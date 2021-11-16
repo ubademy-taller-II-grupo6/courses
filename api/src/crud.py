@@ -15,6 +15,17 @@ def get_courses_by_creator (db: Session, idcreator: int = None):
         
 def get_courses(db: Session):
     return db.query (models.Course).all()
+
+def get_exam_by_course(db: Session, idcourse: int, idexam: int):
+    if idcourse:
+        if idexam:
+            return db.query (   models.CourseExam).filter(
+                                models.CourseExam.idcourse == idcourse).filter(
+                                models.CourseExam.idexam == idexam).first()
+
+def get_exams(db: Session, idcourse: int):
+    if idcourse:
+        return db.query (models.CourseExam).filter(models.CourseExam.idcourse == idcourse).all()
         
 def create_course(db: Session, course: schema.Course):
     course_model  = models.Course(**course.dict())
@@ -22,6 +33,13 @@ def create_course(db: Session, course: schema.Course):
     db.commit()
     db.refresh(course_model)
     return course_model
+
+def create_courseexam(db: Session, courseexam: schema.CourseExam):
+    courseexam_model = models.CourseExam(**courseexam.dict())
+    db.add(courseexam_model)
+    db.commit()
+    db.refresh(courseexam_model)
+    return courseexam_model
 
 def update_course(db: Session, id: int, course: schema.Course):
     course_model                    = models.Course(**course.dict())
@@ -60,6 +78,15 @@ def delete_course_favorite(db: Session, favorite: schema.Favorite):
     db.commit()
     return favorite
 
+def delete_courseexam (db: Session, courseexam: schema.CourseExam):
+    courseexam_model        = models.CourseExam(**courseexam.dict())
+    courseexam_to_delete    = db.query( models.CourseExam).filter(
+                                        models.CourseExam.idcourse == courseexam_model.idcourse).filter(
+                                        models.CourseExam.idexam == courseexam_model.idexam).first() 
+    db.delete(courseexam_to_delete)
+    db.commit()
+    return courseexam
+        
 def error_message(message):
     return {
         'error': message

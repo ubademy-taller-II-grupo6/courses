@@ -17,3 +17,9 @@ class Favorite (BaseModel):
     idstudent               :   int
     class Config:
         orm_mode = True                
+        
+class CourseExam (BaseModel):
+    idcourse                :   int
+    idexam                  :   int
+    class Config:
+        orm_mode = True                        

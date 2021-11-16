@@ -17,5 +17,11 @@ class Favorite(Base):
     __tablename__   = 'favorites'
     idcourse        = Column(Integer, primary_key = True)
     idstudent       = Column(Integer, primary_key = True)
+    
+class CourseExam(Base):
+    __tablename__   = 'coursesexams'
+    id              = Column(Integer, primary_key = True)
+    idcourse        = Column(Integer)
+    idexam          = Column(Integer)    
         
     

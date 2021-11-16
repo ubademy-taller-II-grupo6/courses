@@ -4,7 +4,7 @@ import  crud
 from    fastapi                 import FastAPI, Depends, HTTPException
 from    fastapi.middleware.cors import CORSMiddleware
 from    db                      import SessionLocal
-from    schema                  import Course, Favorite     
+from    schema                  import Course, Favorite, CourseExam     
                                 
 app = FastAPI()
 app.add_middleware( CORSMiddleware, 
@@ -20,15 +20,16 @@ def db():
         yield db
     finally:
         db.close()
-@app.get('/courses/{id}')
-def get_course_by_id (id:int, db=Depends(db)):
-    course = crud.get_course_by_id(db,id)
+        
+@app.get('/courses/{idcourse}')
+def get_course_by_id (idcourse:int, db=Depends(db)):
+    course = crud.get_course_by_id(db,idcourse)
     if course:
         return course
     else:
-        raise HTTPException(404, crud.error_message(f'No existe el curso con id: {id}'))
+        raise HTTPException(404, crud.error_message(f'No existe el curso con id: {idcourse}'))
 
-@app.get('/courses')
+@app.get('/courses/')
 def get_courses(db=Depends(db)):
     courses = crud.get_courses(db)
     if courses:
@@ -59,19 +60,36 @@ def get_courses_by_creator (idcreator:int, db=Depends(db)):
     if courses:
         return courses
     else:
-        raise HTTPException(404, crud.error_message(f'No existen cursos creados por el creador con id: {idcreator}'))    
+        raise HTTPException(404, crud.error_message(f'No existen cursos creados por el creador con id: {idcreator}'))
+
+@app.get('/courses/{idcourse}/exams/')
+def get_exams (idcourse:int, db=Depends(db)):
+    exams = crud.get_exams(db,idcourse)
+    if exams:
+        return exams
+    else:
+        raise HTTPException(404, crud.error_message(f'No existen examenes asignados al curso con id: {idcourse}'))
             
+@app.get('/courses/{idcourse}/exams/{idexam}/')
+def get_exam_by_course (idcourse:int, idexam: int, db=Depends(db)):
+    exam = crud.get_exam_by_course (db,idcourse, idexam)
+    if exam:
+        return exam
+    else:
+        raise HTTPException(404, crud.error_message(f'El examen con id: {idexam} no esta asignado al curso con id: {idcourse}'))
+                
 @app.post('/courses/')
 def create_course(course: Course, db=Depends(db)):
     return crud.create_course(db, course)
 
 @app.put('/courses/')
-def update_course(id: int , course: Course, db=Depends(db)):
-    course_exists = crud.get_course_by_id(db, id)
-    if course_exists is None:
-        raise HTTPException(404, detail= crud.error_message(f'No existe el curso con id: {id}'))
-    return crud.update_course(db, id, course)
-
+def update_course(idcourse: int , course: Course, db=Depends(db)):
+    course_exists = crud.get_course_by_id(db, idcourse)
+    if course_exists:
+        return crud.update_course(db, idcourse, course)
+    else:
+        raise HTTPException(404, detail= crud.error_message(f'No existe el curso con id: {idcourse}'))
+    
 @app.post('/courses/favorites/')
 def create_course_favorite(favorite: Favorite, db=Depends(db)):
     favorite_exists = crud.get_course_favorite_by_student(db, favorite.idcourse, favorite.idstudent)
@@ -87,6 +105,22 @@ def delete_course_favorite(favorite: Favorite, db=Depends(db)):
         return crud.delete_course_favorite (db, favorite)    
     else:    
         raise HTTPException(404, detail= crud.error_message(f'El curso con id: {favorite.idcourse} no existe como favorito para el estudiante con id: {favorite.idstudent}'))
+
+@app.post('/courses/exams/')
+def create_courseexam (courseexam: CourseExam, db=Depends(db)):
+    courseexam_exists = crud.get_exam_by_course(db,courseexam.idcourse, courseexam.idexam)   
+    if courseexam_exists:
+        raise HTTPException(404, detail= crud.error_message(f'El examen con id: {courseexam.idexam} ya esta asignado al curso con id: {courseexam.idcourse}'))
+    else:    
+        return crud.create_courseexam(db, courseexam)           
+
+@app.delete('/courses/exams/')
+def delete_courseexam(courseexam: CourseExam, db=Depends(db)):
+    courseexam_exists = crud.get_exam_by_course(db, courseexam.idcourse, courseexam.idexam)
+    if courseexam_exists:
+        return crud.delete_courseexam (db, courseexam_exists)    
+    else:    
+        raise HTTPException(404, detail= crud.error_message(f'El examen con id: {courseexam.idexam} no esta asignado al curso con id: {courseexam.idcourse}'))
 
 if __name__ == '__main__':
     uvicorn.run('main:app', host='0.0.0.0', port=int(os.environ.get('PORT')), reload=True)        
