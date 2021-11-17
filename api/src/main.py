@@ -4,7 +4,8 @@ import  crud
 from    fastapi                 import FastAPI, Depends, HTTPException
 from    fastapi.middleware.cors import CORSMiddleware
 from    db                      import SessionLocal
-from    schema                  import Course, Favorite, CourseExam     
+from    schema                  import Course, Type, Favorite, CourseExam    
+import  models 
                                 
 app = FastAPI()
 app.add_middleware( CORSMiddleware, 
@@ -44,7 +45,39 @@ def get_courses_by_type (idtype:str, db=Depends(db)):
         return courses
     else:
         raise HTTPException(404, crud.error_message(f'No existen cursos del tipo id: {idtype}'))
+
+@app.get('/types/{idtype}')
+def get_type(idtype: str, db=Depends(db)):                      
+    type_exists = crud.get_type_by_id(db, idtype)
+    if type_exists: 
+        return type_exists
+    else:
+        raise HTTPException(404, detail= crud.error_message(f'El tipo de curso con id : {idtype} no existe'))
+
+@app.get('/types/')
+def get_type(db=Depends(db)):                      
+    types_exists = crud.get_types(db)
+    if types_exists: 
+        return types_exists
+    else:
+        raise HTTPException(404, detail= crud.error_message(f'No existen tipos de cursos'))
         
+@app.post('/types/')
+def create_type(type: Type, db=Depends(db)):                      
+    type_exists = crud.get_type_by_id(db, type.id)
+    if type_exists: 
+        raise HTTPException(404, detail= crud.error_message(f'El tipo de curso con id : {type.id} ya existe'))
+    else:
+        return crud.create_type(db, type)
+            
+@app.put('/types/')
+def update_type(type: Type, db=Depends(db)):                      
+    type_exists = crud.get_type_by_id(db, type.id)
+    if type_exists: 
+        return crud.update_type(db, type)
+    else:
+        raise HTTPException(404, detail= crud.error_message(f'El tipo de curso con id : {type.id} no existe'))
+                 
 @app.get('/courses/favorites/{idstudent}')
 def get_courses_favorites(idstudent: int, db=Depends(db)):
     courses_favorites = crud.get_courses_favorites(db, idstudent)
@@ -53,7 +86,6 @@ def get_courses_favorites(idstudent: int, db=Depends(db)):
     else:
         raise HTTPException(404, detail= crud.error_message(f'No existen cursos favoritos para el estudiante con id: {idstudent}'))
      
-
 @app.get('/courses/creators/{idcreator}')
 def get_courses_by_creator (idcreator:int, db=Depends(db)):
     courses = crud.get_courses_by_creator(db,idcreator)

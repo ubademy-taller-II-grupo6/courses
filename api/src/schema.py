@@ -11,6 +11,12 @@ class Course (BaseModel):
     
     class Config:
         orm_mode = True
+
+class Type (BaseModel):
+    id                      :   str
+    description             :   str 
+    class Config:
+        orm_mode = True          
         
 class Favorite (BaseModel):
     idcourse                :   int
@@ -22,4 +28,4 @@ class CourseExam (BaseModel):
     idcourse                :   int
     idexam                  :   int
     class Config:
-        orm_mode = True                        
+        orm_mode = True                      

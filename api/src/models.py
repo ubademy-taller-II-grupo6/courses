@@ -1,6 +1,6 @@
-from sqlalchemy.sql.sqltypes import DECIMAL
-from db                  import Base
-from sqlalchemy          import Column, Integer, String, Boolean
+from sqlalchemy.sql.sqltypes    import DECIMAL
+from db                         import Base
+from sqlalchemy                 import Column, Integer, String, Boolean
 
 class Course(Base):
     __tablename__   = 'courses'
@@ -12,6 +12,11 @@ class Course(Base):
     price           = Column(DECIMAL)
     link            = Column(String)
     idcreator       = Column(Integer)
+
+class Type(Base):
+    __tablename__   = 'types'
+    id              = Column(String, primary_key = True)
+    description     = Column(String)
     
 class Favorite(Base):
     __tablename__   = 'favorites'
