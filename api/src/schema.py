@@ -1,31 +1,28 @@
-from pydantic                   import BaseModel
+from pydantic import BaseModel
 
-class Course (BaseModel):
-    title                   :   str
-    description             :   str 
-    idtype                  :   str
-    location                :   str
-    price                   :   float
-    link                    :   str
-    idcreator               :   int
-    
-    class Config:
-        orm_mode = True
 
-class Type (BaseModel):
-    id                      :   str
-    description             :   str 
-    class Config:
-        orm_mode = True          
-        
-class Favorite (BaseModel):
-    idcourse                :   int
-    idstudent               :   int
-    class Config:
-        orm_mode = True                
-        
-class CourseExam (BaseModel):
-    idcourse                :   int
-    idexam                  :   int
-    class Config:
-        orm_mode = True                      
+class CreateCourseModel(BaseModel):
+    title: str
+    description: str
+    hashtags: str
+    type: str
+    category: str
+    exams: int
+    suscription: str
+    location: str
+    creator: int
+
+
+class UpdateCourseModel(BaseModel):
+    title: str
+    description: str
+    hashtags: str
+    type: str
+    exams: int
+    suscription: str
+    location: str
+
+
+class CourseCollaboratorModel(BaseModel):
+    course_id: int
+    collaborator_id: int
