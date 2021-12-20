@@ -2,7 +2,7 @@ create table suscriptions(
     id varchar not null primary key
 );
 
-insert into suscriptions (id) values
+insert into subscriptions (id) values
                                      ('FREE'),
                                      ('BRONZE'),
                                      ('SILVER'),

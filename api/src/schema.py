@@ -8,9 +8,11 @@ class CreateCourseModel(BaseModel):
     type: str
     category: str
     exams: int
-    suscription: str
+    subscription: str
     location: str
     creator: int
+    enrollment_conditions: str
+    unenrollment_conditions: str
 
 
 class UpdateCourseModel(BaseModel):
@@ -19,10 +21,17 @@ class UpdateCourseModel(BaseModel):
     hashtags: str
     type: str
     exams: int
-    suscription: str
+    subscription: str
     location: str
+    enrollment_conditions: str
+    unenrollment_conditions: str
 
 
 class CourseCollaboratorModel(BaseModel):
     course_id: int
-    collaborator_id: int
+    collaborator_email: str
+
+
+class FavoriteModel(BaseModel):
+    student_id: int
+    course_id: int

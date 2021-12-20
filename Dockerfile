@@ -1,7 +1,11 @@
 FROM python
-WORKDIR /app
-COPY ./api/src/*.py ./
-COPY requirements.txt ./
+
+WORKDIR /backend
+
+COPY . /backend
+
+ENV PYTHONPATH ./
+
 RUN pip3 install -r requirements.txt
-ENV PORT=$PORT DATABASE_URL=$DATABASE_URL
-CMD [ "python3", "main.py" ]
+
+CMD ["python3", "api/src/main.py"]

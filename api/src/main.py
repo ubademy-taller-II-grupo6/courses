@@ -5,9 +5,9 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.src.exception_handlers import add_user_exception_handlers
-from api.src.exceptions import InvalidFilterException
+from api.src.exceptions import InvalidFilterException, InvalidOperationException
 from db import SessionLocal
-from schema import Type, Favorite, CourseExam, CreateCourseModel, UpdateCourseModel, CourseCollaboratorModel
+from schema import CreateCourseModel, UpdateCourseModel, CourseCollaboratorModel, FavoriteModel
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware,
@@ -32,9 +32,9 @@ def create_course(course: CreateCourseModel, db=Depends(db)):
     return courses_api.create_course(db, course)
 
 
-@app.get('/courses/{id}')
-def get_course(id: int, db=Depends(db)):
-    return courses_api.get_course(db, id)
+@app.get('/courses')
+def get_courses(id=None, category=None, subscription=None, creator =None, db=Depends(db)):
+    return courses_api.get_courses(db, id, category, subscription, creator)
 
 
 @app.put('/courses/{id}')
@@ -42,43 +42,48 @@ def update_course(id: int, course: UpdateCourseModel, db=Depends(db)):
     return courses_api.update_course(db, id, course)
 
 
-@app.get('/courses')
-def get_courses(db=Depends(db)):
-    return courses_api.get_courses(db)
-
-
-@app.get('/courses/{filter_type}/{filter_value}')
-def filter_courses(filter_type, filter_value, db=Depends(db)):
-    if filter_type == 'suscription':
-        response = courses_api.get_courses_by_suscription(db, filter_value)
-    elif filter_type == 'category':
-        response = courses_api.get_courses_by_category(db, filter_value)
-    elif filter_type == 'creator':
-        response = courses_api.get_courses_by_creator(db, filter_value)
-    else:
-        raise InvalidFilterException()
-    return response
-
-
-@app.post('/collaborators')
+@app.post('/courses/collaborators')
 def add_collaborator(request: CourseCollaboratorModel, db=Depends(db)):
-    return courses_api.add_collaborator(db, request.course_id, request.collaborator_id)
+    return courses_api.add_collaborator(db, request.course_id, request.collaborator_email)
 
 
-@app.delete('/collaborators')
+@app.get('/courses/collaborators')
+def get_courses_collaborators(course_id = None , collaborator_email = None, db=Depends(db)):
+    if course_id:
+        return courses_api.get_collaborators_by_course(db, course_id)
+    elif collaborator_email:
+        return courses_api.get_courses_by_collaborator(db, collaborator_email)
+    raise InvalidOperationException("Operacion invalida")
+
+
+@app.delete('/courses/collaborators')
 def remove_collaborator(request: CourseCollaboratorModel, db=Depends(db)):
-    return courses_api.remove_collaborator(db, request.course_id, request.collaborator_id)
+    return courses_api.remove_collaborator(db, request.course_id, request.collaborator_email)
 
 
-@app.get('/collaborators/{course_id}')
-def get_collaborators_by_course(course_id, db=Depends(db)):
-    return courses_api.get_collaborators_by_course(db, course_id)
+@app.get('/courses/favorites/{student_id}')
+def get_favorites(student_id, category=None, subscription=None, db=Depends(db)):
+    return courses_api.get_favorites(db, student_id, category, subscription)
 
 
-@app.get('/collaborators/courses/{collaborator_id}')
-def get_courses_by_collaborator(collaborator_id, db=Depends(db)):
-    return courses_api.get_courses_by_collaborator(db, collaborator_id)
+@app.post('/courses/favorites')
+def add_to_favorites(favorite: FavoriteModel, db=Depends(db)):
+    return courses_api.add_to_favorites(db, favorite)
+
+
+@app.delete('/courses/favorites')
+def delete_favorite(favorite: FavoriteModel, db=Depends(db)):
+    return courses_api.delete_favorite(db, favorite)
+
+@app.get('courses/categories')
+def get_categories(db=Depends(db)):
+    return courses_api.get_categories(db)
+
+@app.get('courses/subscriptions')
+def get_subscriptions(db=Depends(db)):
+    return courses_api.get_subscriptions(db)
 
 
 if __name__ == '__main__':
-    uvicorn.run('main:app', reload=True)
+    #uvicorn.run('main:app', reload=True)
+    uvicorn.run('main:app', host='0.0.0.0', port=int(os.environ.get('PORT')), reload=True)
