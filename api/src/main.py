@@ -75,13 +75,11 @@ def add_to_favorites(favorite: FavoriteModel, db=Depends(db)):
 def delete_favorite(favorite: FavoriteModel, db=Depends(db)):
     return courses_api.delete_favorite(db, favorite)
 
-@app.get('courses/categories')
+
+@app.get('/courses/categories')
 def get_categories(db=Depends(db)):
     return courses_api.get_categories(db)
 
-@app.get('courses/subscriptions')
-def get_subscriptions(db=Depends(db)):
-    return courses_api.get_subscriptions(db)
 
 
 if __name__ == '__main__':

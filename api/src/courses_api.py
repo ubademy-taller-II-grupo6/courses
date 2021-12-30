@@ -10,7 +10,6 @@ def create_course(db: Session, course: schema.CreateCourseModel):
     course_dict = course.dict()
     if validate_nulls(course_dict.values()):
         raise InvalidOperationException("Se encontraron datos faltantes")
-
     course_model = db_models.Course(**course_dict)
     db.add(course_model)
     try:
@@ -43,9 +42,9 @@ def update_course(db: Session, id: int, course: schema.UpdateCourseModel):
                 db_models.Course.hashtags: course.hashtags,
                 db_models.Course.type: course.type,
                 db_models.Course.exams: course.exams,
-                db_models.Course.suscription: course.subscription,
+                db_models.Course.subscription: course.subscription,
                 db_models.Course.location: course.location,
-                db_models.Course.conditions: course.enrollment_conditions,
+                db_models.Course.enrollment_conditions: course.enrollment_conditions,
                 db_models.Course.unenrollment_conditions: course.unenrollment_conditions
             }
         )
